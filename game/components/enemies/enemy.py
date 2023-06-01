@@ -4,7 +4,7 @@ import random
 from pygame.sprite import Sprite
 
 from game.utils.constants import ENEMY_1, SCREEN_HEIGHT, SCREEN_WIDTH, ENEMY_2
-
+from game.components.bullets.bullet import Bullet
 
 
 class Enemy(Sprite):
@@ -16,6 +16,7 @@ class Enemy(Sprite):
     SHIP_WIDTH = 40
     SHIP_HEIGHT = 60
     X_POS_LIST_SEC = [25, 50, 75, 100, 125, 150, 175, 200, 225, 250, 275]
+    
 
 
     def __init__(self):
@@ -33,22 +34,22 @@ class Enemy(Sprite):
         self.image_sec = pygame.transform.scale(self.image_sec, (40, 60))
         self.rect_sec = self.image_sec.get_rect()
         self.rect_sec.x = self.X_POS_LIST_SEC[random.randint(0, 10)]
-        self.rect_sec.y = self.Y_POS
         self.movement_x_sec = random.choice(['left', 'right'])
-        self.speed_x_sec = 8
+        self.speed_x_sec = 10
         self.index_sec = 0
         self.move_sec = 0
-        
+        self.type = 'enemy'
+        self.shooting_time  = random.randint(30, 50)
 
-    def update(self, ships):
+    def update(self, ships, game):
         self.rect.y += self.speed_y
+        self.shoot(game.bullet_manager)
 
         if self.movement_x == 'left':
             self.rect.x -= self.speed_x 
         else:
             self.rect.x += self.speed_x
         self.change_movement_x()
-        self.change_movement_x_sec()
 
         if self.rect.y >= SCREEN_HEIGHT:
             ships.remove(self)
@@ -73,7 +74,7 @@ class Enemy(Sprite):
     def draw(self, screen):
         screen.blit(self.image, (self.rect.x, self.rect.y))
         screen.blit(self.image_sec, (self.rect_sec.x, self.rect_sec.y))
-        
+    
     def change_movement_x(self):
         self.index += 1
         if (self.index >= self.move_x_for and self.movement_x == 'right') or (self.rect.x >= SCREEN_WIDTH - self.SHIP_WIDTH):
@@ -82,19 +83,14 @@ class Enemy(Sprite):
         elif (self.index >= self.move_x_for and self.movement_x == 'left') or (self.rect.x <= 10):
             self.movement_x = 'right'
             self.index = 0
-    def change_movement_x_sec(self):
-        self.index_sec += 1
-        if self.movement_x_sec == 'left' and self.rect_sec.x <= 10:
-            self.movement_x_sec = 'right'
-            self.index_sec = 0
-        elif self.movement_x_sec == 'right' and self.rect_sec.x >= SCREEN_WIDTH - self.SHIP_WIDTH:
-            self.movement_x_sec = 'left'
-            self.index_sec = 0
-        else:
-            if self.movement_x_sec == 'left':
-                self.rect_sec.x -= self.speed_x_sec
-            else:
-                self.rect_sec.x += self.speed_x_sec
+    
+    def shoot(self, bullet_manager):
+        current_time = pygame.time.get_ticks()
+        if self.shooting_time <= current_time:
+            bullet = Bullet(self)
+            bullet_manager.add_bullet(bullet)
+            self.shooting_time += random.randint(30, 50)
+
 
 
 
