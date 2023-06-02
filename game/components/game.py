@@ -19,11 +19,13 @@ class Game:
         self.x_pos_bg = 0
         self.y_pos_bg = 0
         self.death_count = 0
+        self.score = 0
+        self.best_score = 0
         self.player = Spaceship()
         self.enemy_manager = EnemyManager()
         self.bullet_manager = BulletManager()
         self.menu = Menu('Press Any Key To Start. . .', self.screen)
-
+        
     def execute(self):
         self.running = True
         while self.running:
@@ -43,13 +45,13 @@ class Game:
             self.events()
             self.update()
             self.draw()
-        pygame.display.quit()
-        pygame.quit()
+        
 
     def events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.playing = False
+            
 
     def update(self):
         user_input = pygame.key.get_pressed()
@@ -88,9 +90,17 @@ class Game:
         half_screen_height = SCREEN_HEIGHT // 2
         
         self.menu.reset_screen_color(self.screen)
-       
+
         if self.death_count > 0:
-            self.menu.update_message('New Message')
+            if self.score > self.best_score:
+                self.best_score = self.score
+                self.menu.update_message(f'New Best Score: {self.best_score}')
+            else:
+                self.menu.update_message(f'Score: {self.score}')
+        
+
+        
+        
 
         icon = pygame.transform.scale(ICON, (80, 120))
         self.screen.blit(icon, (half_screen_width - 50, half_screen_height - 150))
@@ -102,12 +112,23 @@ class Game:
         self.score += 1
 
     def draw_score(self):
+        #font = pygame.font.Font(FONT_STYLE, 30)
+        #text = font.render(f'Score: {self.score}', True, (255, 255, 255))
+        #text_rect = text.get_rect()
+        #text_rect.center = (1000, 50)
+        #self.screen.blit(text, text_rect)
         font = pygame.font.Font(FONT_STYLE, 30)
-        text = font.render(f'Score: {self.score}', True, (255, 255, 255))
-        text_rect = text.get_rect()
-        text_rect.center = (1000, 50)
-        self.screen.blit(text, text_rect)
-
+        score_text = f'Score: {self.score}'
+        best_score_text = f'Best Score: {self.best_score}'
+        score_render = font.render(score_text, True, (255, 255, 255))
+        best_score_render = font.render(best_score_text, True, (255, 255, 255))
+        score_rect = score_render.get_rect()
+        best_score_rect = best_score_render.get_rect()
+        score_rect.center = (1000, 50)
+        best_score_rect.center = (1000, 80)
+        self.screen.blit(score_render, score_rect)
+        self.screen.blit(best_score_render, best_score_rect)
+    
 
                          
                     
