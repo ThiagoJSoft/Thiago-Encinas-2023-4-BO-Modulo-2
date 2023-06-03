@@ -19,7 +19,7 @@ class Enemy(Sprite):
     
 
 
-    def __init__(self):
+    def __init__(self, enemy_type=1, x_speed=5, y_speed=2, move_x_for=[50, 120]):
         self.image = ENEMY_1
         self.image = pygame.transform.scale(self.image, (40, 60))
         self.rect = self.image.get_rect()
@@ -67,6 +67,8 @@ class Enemy(Sprite):
             self.rect_sec.x += self.speed_x_sec
 
         self.move_sec += self.speed_x_sec
+
+        
         
         
         
@@ -91,6 +93,10 @@ class Enemy(Sprite):
             bullet_manager.add_bullet(bullet)
             self.shooting_time += random.randint(30, 50)
 
+    
+
+
+    
 
 
 

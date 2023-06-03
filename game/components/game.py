@@ -5,6 +5,9 @@ from game.components.spaceship import Spaceship
 from game.components.enemies.enemy_manager import EnemyManager
 from game.components.bullets.bullet_manager import BulletManager
 from game.components.menu import Menu
+from game.components.power_ups.power_up_manager import PowerUpManager
+
+
 
 class Game:
     def __init__(self):
@@ -24,7 +27,9 @@ class Game:
         self.player = Spaceship()
         self.enemy_manager = EnemyManager()
         self.bullet_manager = BulletManager()
-        self.menu = Menu('Press Any Key To Start. . .', self.screen)
+        self.menu = Menu('Press Any Key To Start. . . ', self.screen)
+        self.power_up_manager = PowerUpManager()
+
         
     def execute(self):
         self.running = True
@@ -58,6 +63,11 @@ class Game:
         self.player.update(user_input, self)
         self.enemy_manager.update(self)
         self.bullet_manager.update(self)
+        self.power_up_manager.update(self)
+    
+    def reset(self):
+        self.power_up_manager.reset()
+
         
         
 
@@ -69,6 +79,8 @@ class Game:
         self.enemy_manager.draw(self.screen)
         self.bullet_manager.draw(self.screen)
         self.draw_score()
+        self.power_up_manager.draw(self.screen)
+        self.draw_power_up_time()
         pygame.display.update()
         pygame.display.flip()
 
@@ -97,15 +109,16 @@ class Game:
                 self.menu.update_message(f'New Best Score: {self.best_score}')
             else:
                 self.menu.update_message(f'Score: {self.score}')
-        
-
-        
-        
+        #else:
+            #self.menu.update_message('Press Any Key To Start. . .')        
 
         icon = pygame.transform.scale(ICON, (80, 120))
         self.screen.blit(icon, (half_screen_width - 50, half_screen_height - 150))
+        
+        
 
-        self.menu.draw(self.screen)
+
+        self.menu.draw(self.screen, 'Press Any Key To Start. . .')
         self.menu.update(self)
 
     def update_score(self):
@@ -130,8 +143,17 @@ class Game:
         self.screen.blit(best_score_render, best_score_rect)
     
 
-                         
-                    
+    def draw_power_up_time(self):
+        if self.player.has_power_up:
+            time_to_show = round((self.player.power_time_up - pygame.time.get_ticks()) / 1000, 2)
+
+            if time_to_show >= 0:
+                self.menu.draw(self.screen, f'{self.player.power_up_type.capitalize()} is enabled for {time_to_show} seconds', 540, 50, (255, 255, 255))
+
+            else:
+                self.player.has_power_up = False
+                self.player.power_up_type = DEFAULT_TYPE
+                self.player.set_image()                    
 
         
 
