@@ -6,7 +6,12 @@ from game.components.enemies.enemy_manager import EnemyManager
 from game.components.bullets.bullet_manager import BulletManager
 from game.components.menu import Menu
 from game.components.power_ups.power_up_manager import PowerUpManager
-
+from game.components.counter import Counter
+from game.utils.constants import ruta_musica
+pygame.init()
+pygame.mixer.init()
+pygame.mixer.music.load(ruta_musica)
+pygame.mixer.music.play(-1)
 
 
 class Game:
@@ -21,15 +26,14 @@ class Game:
         self.game_speed = 10
         self.x_pos_bg = 0
         self.y_pos_bg = 0
-        self.death_count = 0
-        self.score = 0
-        self.best_score = 0
         self.player = Spaceship()
         self.enemy_manager = EnemyManager()
         self.bullet_manager = BulletManager()
-        self.menu = Menu('Press Any Key To Start. . . ', self.screen)
+        self.menu = Menu(self.screen)
         self.power_up_manager = PowerUpManager()
-
+        self.score = Counter()
+        self.death_count = Counter()
+        self.highest_score = Counter()
         
     def execute(self):
         self.running = True
@@ -42,9 +46,7 @@ class Game:
 
     def run(self):
         # Game loop: events - update - draw
-        self.score = 0
-        self.enemy_manager.reset()
-        self.bullet_manager.reset()
+        self.reset()
         self.playing = True
         while self.playing:
             self.events()
@@ -67,7 +69,10 @@ class Game:
     
     def reset(self):
         self.power_up_manager.reset()
-
+        self.bullet_manager.reset()
+        self.enemy_manager.reset()
+        self.score.reset()
+        self.player.reset()
         
         
 
@@ -78,7 +83,7 @@ class Game:
         self.player.draw(self.screen)
         self.enemy_manager.draw(self.screen)
         self.bullet_manager.draw(self.screen)
-        self.draw_score()
+        self.score.draw(self.screen)
         self.power_up_manager.draw(self.screen)
         self.draw_power_up_time()
         pygame.display.update()
@@ -103,45 +108,42 @@ class Game:
         
         self.menu.reset_screen_color(self.screen)
 
-        if self.death_count > 0:
-            if self.score > self.best_score:
-                self.best_score = self.score
-                self.menu.update_message(f'New Best Score: {self.best_score}')
-            else:
-                self.menu.update_message(f'Score: {self.score}')
-        #else:
-            #self.menu.update_message('Press Any Key To Start. . .')        
-
+        if self.death_count.count == 0:
+            self.menu.draw(self.screen, 'Press any key to start ...')
+        else:
+            self.update_highest_score()
+            self.menu.draw(self.screen, 'Game over. Press any key to restart')
+            self.menu.draw(self.screen, f'Your score: {self.score.count}', half_screen_width, 350, )
+            self.menu.draw(self.screen, f'Highest score: {self.highest_score.count}', half_screen_width, 400, )
+            self.menu.draw(self.screen, f'Total deaths: {self.death_count.count}', half_screen_width, 450, )
+        
         icon = pygame.transform.scale(ICON, (80, 120))
         self.screen.blit(icon, (half_screen_width - 50, half_screen_height - 150))
-        
-        
-
-
-        self.menu.draw(self.screen, 'Press Any Key To Start. . .')
         self.menu.update(self)
 
-    def update_score(self):
-        self.score += 1
+    
 
-    def draw_score(self):
-        #font = pygame.font.Font(FONT_STYLE, 30)
+    #def draw_score(self):
+       #font = pygame.font.Font(FONT_STYLE, 30)
         #text = font.render(f'Score: {self.score}', True, (255, 255, 255))
         #text_rect = text.get_rect()
         #text_rect.center = (1000, 50)
         #self.screen.blit(text, text_rect)
-        font = pygame.font.Font(FONT_STYLE, 30)
-        score_text = f'Score: {self.score}'
-        best_score_text = f'Best Score: {self.best_score}'
-        score_render = font.render(score_text, True, (255, 255, 255))
-        best_score_render = font.render(best_score_text, True, (255, 255, 255))
-        score_rect = score_render.get_rect()
-        best_score_rect = best_score_render.get_rect()
-        score_rect.center = (1000, 50)
-        best_score_rect.center = (1000, 80)
-        self.screen.blit(score_render, score_rect)
-        self.screen.blit(best_score_render, best_score_rect)
-    
+        #font = pygame.font.Font(FONT_STYLE, 30)
+        #score_text = f'Score: {self.score}'
+        #best_score_text = f'Best Score: {self.best_score}'
+        #score_render = font.render(score_text, True, (255, 255, 255))
+        #best_score_render = font.render(best_score_text, True, (255, 255, 255))
+        #score_rect = score_render.get_rect()
+        #best_score_rect = best_score_render.get_rect()
+        #score_rect.center = (1000, 50)
+        #best_score_rect.center = (1000, 80)
+        #self.screen.blit(score_render, score_rect)
+        #self.screen.blit(best_score_render, best_score_rect)
+   
+    def update_highest_score(self):
+        if self.score.count > self.highest_score.count:
+            self.highest_score.set_count(self.score.count)
 
     def draw_power_up_time(self):
         if self.player.has_power_up:
@@ -155,6 +157,12 @@ class Game:
                 self.player.power_up_type = DEFAULT_TYPE
                 self.player.set_image()                    
 
-        
+            #if self.player.has_bullet_power_up:
+                #time_remaining = (self.player.power_time_up - pygame.time.get_ticks()) / 1000
+                #if time_remaining > 0:
+                    #self.menu.draw(self.screen, f'Bullet Power-Up enabled for {time_remaining:.1f} seconds', 540, 50, (255, 255, 255))
+                #else:
+                    #self.player.has_bullet_power_up = False
+                    #self.menu.draw(self.screen, 'Bullet Power-Up disabled', 540, 50, (255, 255, 255))
 
                          

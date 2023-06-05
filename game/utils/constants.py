@@ -29,3 +29,7 @@ ENEMY_1 = pygame.image.load(os.path.join(IMG_DIR, "Enemy/enemy_1.png"))
 ENEMY_2 = pygame.image.load(os.path.join(IMG_DIR, "Enemy/enemy_2.png"))
 
 FONT_STYLE = 'freesansbold.ttf'
+
+BULLET_PUP= pygame.image.load(os.path.join(IMG_DIR, "Bullet/bullet_4.png"))
+
+ruta_musica = os.path.join(IMG_DIR, "Bullet/Jala.mp3")

@@ -23,7 +23,6 @@ class Spaceship(Sprite):
         self.power_up_type = DEFAULT_TYPE
         self.has_power_up = False
         self.power_time_up = 0
-        
 
     def update(self, user_input, game):
         if user_input[pygame.K_LEFT]:
@@ -38,17 +37,11 @@ class Spaceship(Sprite):
             self.shoot(game)
         
 
-    #def move_left(self):
-        #if self.rect.right <= 0:
-            #self.rect.x = SCREEN_WIDTH
-        #else:
-            #self.rect.x -= self.SHIP_SPEED
 
-    #def move_right(self):
-        #if self.rect.left >= SCREEN_WIDTH:
-            #self.rect.x = -self.SHIP_WIDTH
-        #else:
-            #self.rect.x += self.SHIP_SPEED
+    def reset(self):
+        self.rect.x = self.X_POS
+        self.rect.y = self.Y_POS
+
     def move_left(self):
         self.rect.x = (self.rect.x - self.SHIP_SPEED) % SCREEN_WIDTH
 
@@ -70,13 +63,12 @@ class Spaceship(Sprite):
 
 
     def shoot(self, game):
-        bullet = Bullet(self)
-        game.bullet_manager.add_bullet(bullet)
+            bullet = Bullet(self)
+            game.bullet_manager.add_bullet(bullet)
+        
 
 
     def set_image(self, size = (SHIP_WIDTH, SHIP_HEIGHT), image = SPACESHIP):
         self.image = image
         self.image = pygame.transform.scale(self.image, size)
-        
-
-
+    
